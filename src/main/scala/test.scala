@@ -6,26 +6,26 @@ object Test {
   val fallback: PF = {
     case _ => false
   }
-  val opt = folder(orElse)
-  val std = folder(stdOrElse)
+  val opt = folder(orElse)_
+  val std = folder(stdOrElse)_
 
-  def folder(f: (PF, PF) => PF) =
-    f((pf /: (1 to 100)) {
+  def folder(f: (PF, PF) => PF)(n: Int) =
+    f((pf /: (1 to n)) {
       (a,i) => f(a, pf)
     }, fallback)
 
   def alot(block: => Any) {
     for (_ <- 1 to 100000) block
   }
-  def time(block: => Any) {
+  def time(block: => Any) = {
     val start = System.currentTimeMillis
     block
-    println(System.currentTimeMillis - start)
+    System.currentTimeMillis - start
   }
   def stdOrElse[A, B, A1 <: A, B1 >: B](
     left: PartialFunction[A,B],
     right: PartialFunction[A1, B1]
-  ): PartialFunction[A1, B1] = left.orElse(right)
+  ) = left.orElse(right)
 
   def orElse[A, B, A1 <: A, B1 >: B](
     left: PartialFunction[A,B],
@@ -67,6 +67,17 @@ object Test {
       left.attempt(x).orElse {
         right.attempt(x)
       }
+    }
+  }
+  def main(args: Array[String]) {
+    for (n <- 1 to 50) {
+      val List(st1, st2, ot1, ot2) = 
+        for { f <- std(n) :: opt(n) :: Nil
+              str <- "hello" :: "hell" :: Nil
+        } yield time { alot { f(str) } }
+
+      println("n=%3d std: %4d, %-4d opt: %4d, %-4d".format(
+        n, st1, st2, ot1, ot2))
     }
   }
 }
