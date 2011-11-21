@@ -70,7 +70,7 @@ object Test {
     }
   }
   def main(args: Array[String]) {
-    for (n <- 1 to 50) {
+    def test(n: Int) {
       val List(st1, st2, ot1, ot2) = 
         for { f <- std(n) :: opt(n) :: Nil
               str <- "hello" :: "hell" :: Nil
@@ -79,5 +79,8 @@ object Test {
       println("n=%3d std: %4d, %-4d opt: %4d, %-4d".format(
         n, st1, st2, ot1, ot2))
     }
+    (1 to 5).foreach(test)
+    println("^^^^ warmup lap ^^^^")
+    (1 to 50).foreach(test)
   }
 }
